@@ -972,6 +972,6 @@ int main(int argc, char **argv)
 	// ---------------------------------------------------------
 
 	fprintf(stderr, "Bye.\n");
-    // mpsse_close();
+	mpsse_close();
 	return 0;
 }

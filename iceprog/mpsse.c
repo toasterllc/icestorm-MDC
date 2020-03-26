@@ -29,6 +29,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <libusb.h>
 
 #include "mpsse.h"
 
@@ -356,6 +357,9 @@ void mpsse_init(int ifnum, const char *devstr, bool slow_clock)
 
 void mpsse_close(void)
 {
+	libusb_release_interface(mpsse_ftdic.usb_dev, mpsse_ftdic.interface);
+	libusb_attach_kernel_driver(mpsse_ftdic.usb_dev, mpsse_ftdic.interface);
+
 	ftdi_set_latency_timer(&mpsse_ftdic, mpsse_ftdi_latency);
 	ftdi_disable_bitbang(&mpsse_ftdic);
 	ftdi_usb_close(&mpsse_ftdic);
