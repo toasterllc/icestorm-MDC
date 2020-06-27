@@ -357,6 +357,12 @@ void mpsse_init(int ifnum, const char *devstr, bool slow_clock)
 
 void mpsse_close(void)
 {
+	/* Enter MPSSE (Multi-Protocol Synchronous Serial Engine) mode. Set all pins to output. */
+	if (ftdi_set_bitmode(&mpsse_ftdic, 0xff, BITMODE_MPSSE) < 0) {
+		fprintf(stderr, "Failed to set BITMODE_MPSSE on iCE FTDI USB device.\n");
+		mpsse_error(2);
+	}
+    
 	libusb_release_interface(mpsse_ftdic.usb_dev, mpsse_ftdic.interface);
 	libusb_attach_kernel_driver(mpsse_ftdic.usb_dev, mpsse_ftdic.interface);
 
