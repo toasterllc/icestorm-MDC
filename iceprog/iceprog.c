@@ -93,6 +93,16 @@ enum flash_cmd {
 // Hardware specific CS, CReset, CDone functions
 // ---------------------------------------------------------
 
+static void set_flash_mode(bool flash_mode)
+{
+	fprintf(stderr, "flash mode = %d\n", flash_mode);
+    
+	// FTDI_FLASH_MODE / ACBUS0 (GPIOH0)
+	uint8_t gpio = (flash_mode ? 0x01 : 0x00);
+	uint8_t direction = 0x01;
+	mpsse_set_gpio_high(gpio, direction);
+}
+
 static void set_cs_creset(int cs_b, int creset_b)
 {
 	uint8_t gpio = 0;
@@ -108,7 +118,7 @@ static void set_cs_creset(int cs_b, int creset_b)
 		gpio |= 0x80;
 	}
 
-	mpsse_set_gpio(gpio, direction);
+	mpsse_set_gpio_low(gpio, direction);
 }
 
 static bool get_cdone(void)
@@ -852,6 +862,12 @@ int main(int argc, char **argv)
 	else if (prog_sram)
 	{
 		// ---------------------------------------------------------
+		// Set flash mode = false
+		// ---------------------------------------------------------
+		
+		set_flash_mode(false);
+		
+		// ---------------------------------------------------------
 		// Reset
 		// ---------------------------------------------------------
 
@@ -888,6 +904,12 @@ int main(int argc, char **argv)
 	}
 	else /* program flash */
 	{
+		// ---------------------------------------------------------
+		// Set flash mode = true
+		// ---------------------------------------------------------
+		
+		set_flash_mode(true);
+        
 		// ---------------------------------------------------------
 		// Reset
 		// ---------------------------------------------------------

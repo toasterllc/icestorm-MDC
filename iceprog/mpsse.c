@@ -231,9 +231,16 @@ uint8_t mpsse_xfer_spi_bits(uint8_t data, int n)
 	return mpsse_recv_byte();
 }
 
-void mpsse_set_gpio(uint8_t gpio, uint8_t direction)
+void mpsse_set_gpio_low(uint8_t gpio, uint8_t direction)
 {
 	mpsse_send_byte(MC_SETB_LOW);
+	mpsse_send_byte(gpio); /* Value */
+	mpsse_send_byte(direction); /* Direction */
+}
+
+void mpsse_set_gpio_high(uint8_t gpio, uint8_t direction)
+{
+	mpsse_send_byte(MC_SETB_HIGH);
 	mpsse_send_byte(gpio); /* Value */
 	mpsse_send_byte(direction); /* Direction */
 }
