@@ -364,7 +364,7 @@ void mpsse_init(int ifnum, const char *devstr, bool slow_clock)
 void mpsse_close(void)
 {
 	ftdi_set_latency_timer(&mpsse_ftdic, mpsse_ftdi_latency);
-	ftdi_disable_bitbang(&mpsse_ftdic);
+    // ftdi_disable_bitbang(&mpsse_ftdic);
 	ftdi_usb_close(&mpsse_ftdic);
 	ftdi_deinit(&mpsse_ftdic);
 }
