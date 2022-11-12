@@ -122,7 +122,7 @@ struct FpgaConfig
 	void write_bits(std::ostream &ofs) const;
 
 	// icebox i/o
-	void read_ascii(std::istream &ifs, bool nosleep);
+	void read_ascii(std::istream &ifs, bool nosleep, const string& freqrange);
 	void write_ascii(std::ostream &ofs) const;
 
 	// netpbm i/o
@@ -612,7 +612,7 @@ void FpgaConfig::write_bits(std::ostream &ofs) const
 	write_byte(ofs, crc_value, file_offset, 0x00);
 }
 
-void FpgaConfig::read_ascii(std::istream &ifs, bool nosleep)
+void FpgaConfig::read_ascii(std::istream &ifs, bool nosleep, const string& freqrange)
 {
 	debug("## %s\n", __PRETTY_FUNCTION__);
 	info("Parsing ascii file..\n");
@@ -620,7 +620,7 @@ void FpgaConfig::read_ascii(std::istream &ifs, bool nosleep)
 	bool got_device = false;
 	this->cram.clear();
 	this->bram.clear();
-	this->freqrange = "low";
+	this->freqrange = freqrange;
 	this->warmboot = "enabled";
 
 	bool reuse_line = true;
@@ -1345,6 +1345,9 @@ void usage(const char *cmd)
 	log("    -s\n");
 	log("        disable final deep-sleep SPI flash command after bitstream is loaded\n");
 	log("\n");
+	log("    -Fl, -Fm, -Fh\n");
+	log("        freqrange for loading bitstream: low (230ms, 7.5MHz) / medium (110ms, 24MHz) / high (70ms, 40MHz)\n");
+	log("\n");
 	log("    -b\n");
 	log("        write cram bitmap as netpbm file\n");
 	log("\n");
@@ -1391,6 +1394,7 @@ int main(int argc, char **argv)
         bool skip_bram_initialization = false;
 	int netpbm_banknum = -1;
 	int checkerboard_m = 1;
+	string freqrange = "low";
 
 	for (int i = 0; argv[0][i]; i++)
 		if (string(argv[0]+i) == "iceunpack")
@@ -1421,6 +1425,13 @@ int main(int argc, char **argv)
 					netpbm_banknum = arg[++i] - '0';
 				} else if (arg[i] == 's') {
 					nosleep_mode = true;
+				} else if (arg[i] == 'F') {
+					switch (arg[++i]) {
+					case 'l':   freqrange="low";    break;
+					case 'm':   freqrange="medium"; break;
+					case 'h':   freqrange="high";   break;
+					default:    usage(argv[0]);     break;
+					}
 				} else if (arg[i] == 'v') {
 					log_level++;
 				} else if (arg[i] == 'n') {
@@ -1469,7 +1480,7 @@ int main(int argc, char **argv)
 		if (!netpbm_mode)
 			fpga_config.write_ascii(*osp);
 	} else {
-		fpga_config.read_ascii(*isp, nosleep_mode);
+		fpga_config.read_ascii(*isp, nosleep_mode, freqrange);
 		if (!netpbm_mode)
 			fpga_config.write_bits(*osp);
 	}
